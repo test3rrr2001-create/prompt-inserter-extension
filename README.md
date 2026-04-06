@@ -1,4 +1,4 @@
-# Prompt Inserter MVP
+# プロンプト入力支援 (Prompt Inserter)
 
 `prompts.md` に保存したプロンプトを Chrome 拡張の popup から選び、Gemini / ChatGPT / Claude の入力欄へ挿入する Chrome 拡張です。
 プレースホルダーを含むプロンプトは、挿入前にモーダルで変数入力できます。
