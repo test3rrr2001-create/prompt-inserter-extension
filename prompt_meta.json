@@ -1,0 +1,191 @@
+[
+  {
+    "id": "prompt_6b5e92c3",
+    "fullTitle": "初回商談の完全準備（顧客の深層課題と反論の事前ハック）",
+    "displayTitle": "初回商談準備",
+    "description": "表面的な質問を排除し、プロセス・目標・影響の3段階で顧客のペインを浮き彫りにするフレームワークです。",
+    "category": "商社・営業向け",
+    "tags": ["営業", "商談", "交渉"],
+    "sortOrder": 10
+  },
+  {
+    "id": "prompt_47c2ce45",
+    "fullTitle": "高難度な価格交渉とZOPA（合意可能領域）策定",
+    "displayTitle": "価格交渉",
+    "description": "自社の利益を守りつつ、相手に「勝った」と思わせるための心理的ロジックをAIに構築させます。",
+    "category": "商社・営業向け",
+    "tags": ["営業", "価格", "交渉"],
+    "sortOrder": 20
+  },
+  {
+    "id": "prompt_a60c922d",
+    "fullTitle": "音信不通（ゴースティング）からの商談復活",
+    "displayTitle": "商談復活メール",
+    "description": "失注や連絡途絶からのリカバリーにおいて、相手に罪悪感を与えず、かつ「必死さ」を消すためのプロンプトです。",
+    "category": "商社・営業向け",
+    "tags": ["営業", "メール", "フォロー"],
+    "sortOrder": 30
+  },
+  {
+    "id": "prompt_767db8d5",
+    "fullTitle": "信用状（L/C）および貿易書類の厳格監査",
+    "displayTitle": "L/C書類監査",
+    "description": "AIの「推測（ハルシネーション）」を厳格なプロンプト制約で完全に封じ込め、コンプライアンス監査を行います。",
+    "category": "商社・営業向け",
+    "tags": ["貿易", "監査", "コンプライアンス"],
+    "sortOrder": 40
+  },
+  {
+    "id": "prompt_dc1aca29",
+    "fullTitle": "トヨタ式 A3思考プロセスによる根本原因分析（RCA）",
+    "displayTitle": "根本原因分析",
+    "description": "問題の表面的な対処を防ぎ、「なぜ（5 Whys）」を強制することで、真の根本原因と恒久対策を導き出します。",
+    "category": "製造業・サプライチェーン向け",
+    "tags": ["製造", "品質", "分析"],
+    "sortOrder": 50
+  },
+  {
+    "id": "prompt_ee2683d1",
+    "fullTitle": "ISO 9001準拠・ヒューマンエラーを防ぐSOP（標準作業手順書）作成",
+    "displayTitle": "SOP作成",
+    "description": "現場の作業員が「読まない・間違える」リスクを極限まで減らすための「4Cフレームワーク」です。",
+    "category": "製造業・サプライチェーン向け",
+    "tags": ["製造", "SOP", "品質"],
+    "sortOrder": 60
+  },
+  {
+    "id": "prompt_4915fbbb",
+    "fullTitle": "安全確保とダウンタイムを防ぐシフト引き継ぎ（ハンドオーバー）",
+    "displayTitle": "引き継ぎ整理",
+    "description": "雑多なメモから、次シフトの作業員が絶対に知っておくべき重要事項をAIにトリアージ（選別）させます。",
+    "category": "製造業・サプライチェーン向け",
+    "tags": ["製造", "引き継ぎ", "安全"],
+    "sortOrder": 70
+  },
+  {
+    "id": "prompt_fdbe453e",
+    "fullTitle": "適正在庫・発注点の数理・ロジック計算",
+    "displayTitle": "在庫計算",
+    "description": "「在庫を最適化して」という曖昧な指示を捨て、AIに厳密な計算式を適用させて欠品リスクを抽出します。",
+    "category": "製造業・サプライチェーン向け",
+    "tags": ["在庫", "SCM", "計算"],
+    "sortOrder": 80
+  },
+  {
+    "id": "prompt_e995aea2",
+    "fullTitle": "少数ショット（Few-shot）による異常分類",
+    "displayTitle": "異常分類",
+    "description": "AIの暴走を防ぐため、出力フォーマットを厳格なJSONに固定し、分類の前に「推論（Reasoning）」を強制させることで精度を劇的に高めます。",
+    "category": "製造業・サプライチェーン向け",
+    "tags": ["製造", "分類", "品質"],
+    "sortOrder": 90
+  },
+  {
+    "id": "prompt_5e0b230c",
+    "fullTitle": "X（Twitter）のバズ・スレッド構造",
+    "displayTitle": "Xスレッド作成",
+    "description": "最新のXアルゴリズム（滞在時間を最重要視する傾向）に対応し、読者を惹きつける心理的トリガーをAIに強制します。",
+    "category": "マーケティング・SNS向け",
+    "tags": ["SNS", "X", "発信"],
+    "sortOrder": 100
+  },
+  {
+    "id": "prompt_5c396b8d",
+    "fullTitle": "出力の厳格な条件指定（SNS運用向け）",
+    "displayTitle": "SNS台本作成",
+    "description": "トーン＆マナーのブレを防ぐため、ブランドボイスと制約を明確なタグで囲い込みます。",
+    "category": "マーケティング・SNS向け",
+    "tags": ["SNS", "ブランド", "台本"],
+    "sortOrder": 110
+  },
+  {
+    "id": "prompt_d16359fc",
+    "fullTitle": "自動化スケジュールの立案（オペレーション設計）",
+    "displayTitle": "投稿計画作成",
+    "description": "単なる「アイデア出し」ではなく、実務に即落とし込める「運用プレイブック」として出力させます。",
+    "category": "マーケティング・SNS向け",
+    "tags": ["SNS", "運用", "計画"],
+    "sortOrder": 120
+  },
+  {
+    "id": "prompt_35a6dea3",
+    "fullTitle": "論理的圧縮（API連携や大量データ処理向け）",
+    "displayTitle": "大量データ分析",
+    "description": "トークン消費を抑えつつ高速・高精度なデータ分析を実行させます。",
+    "category": "全社共通",
+    "tags": ["分析", "データ", "業務改善"],
+    "sortOrder": 130
+  },
+  {
+    "id": "prompt_87c6a74c",
+    "fullTitle": "自己反省と改善の反復ループ（Chain of Verification）",
+    "displayTitle": "自己検証改善",
+    "description": "自らの出力に対する「検証用の質問」を自問自答させることで、事実誤認を極限まで減らします。",
+    "category": "全社共通",
+    "tags": ["思考", "検証", "改善"],
+    "sortOrder": 140
+  },
+  {
+    "id": "prompt_22398e49",
+    "fullTitle": "複雑な問題のコンポーネント分解（Context-Aware Decomposition）",
+    "displayTitle": "問題分解",
+    "description": "抽象的な問題を一度「一般原則」に引き上げてから具体策に落とし込むアプローチです。",
+    "category": "全社共通",
+    "tags": ["思考", "分解", "戦略"],
+    "sortOrder": 150
+  },
+  {
+    "id": "prompt_aa7b4dc2",
+    "fullTitle": "並列推論（Tree-of-Thought）による最適解探索",
+    "displayTitle": "最適解探索",
+    "description": "複数の思考プロセスを同時に展開させ、AI自身にアプローチの「評価」と「棄却」を行わせます。",
+    "category": "全社共通",
+    "tags": ["思考", "最適化", "戦略"],
+    "sortOrder": 160
+  },
+  {
+    "id": "prompt_ce9a5809",
+    "fullTitle": "破壊的コード・ロジックの修正（Fix My Disaster Code）",
+    "displayTitle": "コード修正",
+    "description": "PLCロジック、Excelマクロ、SQLなど、動かないものを一発で修正させます。",
+    "category": "全社共通",
+    "tags": ["コード", "修正", "自動化"],
+    "sortOrder": 170
+  },
+  {
+    "id": "prompt_f1f127ce",
+    "fullTitle": "究極のメタ・プロンプト（先延ばし撃退と逆質問システム）",
+    "displayTitle": "逆質問コーチ",
+    "description": "AIをコンサルタントとして機能させ、AI側から質問させるアプローチです。",
+    "category": "全社共通",
+    "tags": ["コーチング", "壁打ち", "思考"],
+    "sortOrder": 180
+  },
+  {
+    "id": "prompt_bfcfbed3",
+    "fullTitle": "AI自身による最適プロンプト探索（メタプロンプティング）",
+    "displayTitle": "最適プロンプト作成",
+    "description": "プロンプトの作成そのものをAIに委託し、さらに精度を高めるための再帰的プロンプトです。",
+    "category": "全社共通",
+    "tags": ["プロンプト", "設計", "改善"],
+    "sortOrder": 190
+  },
+  {
+    "id": "prompt_e3eaaab1",
+    "fullTitle": "工業デザイン作成",
+    "displayTitle": "工業デザイン作成",
+    "description": "製品画像を精密に観察し、元の構造や設計思想を保持したまま、要望を反映した新しい工業デザイン画像を生成するためのプロンプトです。",
+    "category": "商品企画・デザイン向け",
+    "tags": ["デザイン", "画像生成", "工業デザイン"],
+    "sortOrder": 200
+  },
+  {
+    "id": "prompt_32d4254e",
+    "fullTitle": "拡張機能生成",
+    "displayTitle": "拡張機能生成",
+    "description": "拡張機能やプラグインの要件を論理分解し、技術的制約を踏まえた最適アーキテクチャとMVP実装ステップを設計するためのプロンプトです。",
+    "category": "開発・実装向け",
+    "tags": ["拡張機能", "設計", "MVP"],
+    "sortOrder": 210
+  }
+]

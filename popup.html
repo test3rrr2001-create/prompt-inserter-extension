@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Inserter</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <section class="popup-top">
+        <div class="header">
+          <h1>Prompt Inserter</h1>
+          <span id="versionText" class="version-text"></span>
+        </div>
+
+        <label class="field">
+          <span>検索</span>
+          <input
+            id="searchInput"
+            class="search-input"
+            type="search"
+            placeholder="タイトル・説明・カテゴリで検索"
+            autocomplete="off"
+            autofocus
+          />
+        </label>
+
+        <div class="filter-row">
+          <label class="field field-compact">
+            <span>カテゴリ</span>
+            <select id="categoryFilter" class="filter-select"></select>
+          </label>
+        </div>
+      </section>
+
+      <section class="popup-middle">
+        <div id="favoriteSection" class="shortcut-section" hidden>
+          <div class="section-head">
+            <p class="section-title">お気に入り</p>
+          </div>
+          <div id="favoriteList" class="chip-list"></div>
+        </div>
+
+        <div class="section-head">
+          <p class="section-title">一覧</p>
+          <button id="favoriteToggle" class="icon-button" type="button" title="お気に入り切替" aria-label="お気に入り切替" aria-pressed="false">☆</button>
+        </div>
+
+        <p id="emptyState" class="empty-state" hidden>検索条件に一致するプロンプトがありません。</p>
+        <div id="promptList" class="prompt-list" role="listbox" aria-label="Prompt list"></div>
+      </section>
+
+      <section class="popup-footer">
+        <p id="promptInfo" class="prompt-info" aria-live="polite"></p>
+        <p class="insert-hint">Enterキーでも挿入可能</p>
+        <button id="insertButton" type="button">入力欄へ挿入</button>
+        <p id="status" class="status" aria-live="polite"></p>
+      </section>
+    </main>
+    <script src="markdown.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

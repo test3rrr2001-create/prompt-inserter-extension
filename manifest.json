@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Prompt Inserter MVP",
+  "version": "0.2.3",
+  "version_name": "0.2.3-prompt-update",
+  "description": "Insert prompts from prompts.md into Gemini, ChatGPT, and Claude without auto-send.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://gemini.google.com/*",
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://claude.ai/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Prompt Inserter"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "prompts.md",
+        "prompt_meta.json"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

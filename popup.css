@@ -1,0 +1,288 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.popup {
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  height: 600px;
+  padding: 14px 14px 12px;
+  overflow: hidden;
+}
+
+.popup-top,
+.popup-middle,
+.popup-footer {
+  min-height: 0;
+}
+
+.popup-top {
+  flex: 0 0 auto;
+}
+
+.popup-middle {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding-bottom: 8px;
+  overflow: hidden;
+}
+
+.popup-footer {
+  flex: 0 0 auto;
+  padding-top: 10px;
+  border-top: 1px solid #dbe2ea;
+  background: #f3f4f6;
+}
+
+.header,
+.section-head,
+.list-item {
+  display: flex;
+}
+
+.header,
+.section-head {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header {
+  margin-bottom: 10px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.version-text {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.field {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.field span,
+.section-title {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.field-compact {
+  margin-bottom: 0;
+}
+
+input,
+select,
+button {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font: inherit;
+}
+
+input,
+select {
+  min-height: 38px;
+  padding: 8px 10px;
+  background: #fff;
+}
+
+.filter-row {
+  margin-bottom: 8px;
+}
+
+.shortcut-section {
+  margin-bottom: 8px;
+}
+
+.chip-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-height: 64px;
+  overflow: auto;
+}
+
+.chip {
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #fff;
+  color: #374151;
+  font-size: 11px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.chip.favorite {
+  border-color: #f5c451;
+  background: #fff8db;
+}
+
+.icon-button {
+  width: 36px;
+  min-width: 36px;
+  min-height: 32px;
+  padding: 0;
+  background: #fff;
+  color: #6b7280;
+  font-size: 18px;
+}
+
+.icon-button.is-active {
+  border-color: #f5c451;
+  background: #fff8db;
+  color: #b7791f;
+}
+
+.empty-state {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: #9a3412;
+}
+
+.prompt-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.list-item {
+  gap: 10px;
+  padding: 9px 10px;
+  border-bottom: 1px solid #edf2f7;
+  cursor: pointer;
+}
+
+.list-item:last-child {
+  border-bottom: 0;
+}
+
+.list-item.is-selected {
+  background: #eef4ff;
+}
+
+.list-item.is-focused {
+  outline: 2px solid #93c5fd;
+  outline-offset: -2px;
+}
+
+.item-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.item-title {
+  min-width: 0;
+  overflow: hidden;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-category {
+  min-width: 0;
+  margin-top: 2px;
+  overflow: hidden;
+  color: #6b7280;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-favorite {
+  width: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #9ca3af;
+  font-size: 16px;
+}
+
+.item-favorite.is-active {
+  border-color: #f5c451;
+  background: #fff8db;
+  color: #b7791f;
+}
+
+.prompt-info {
+  display: -webkit-box;
+  min-height: 34px;
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  overflow: hidden;
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: #eef2f7;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #4b5563;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.insert-hint {
+  margin: 0 0 8px;
+  font-size: 10px;
+  color: #6b7280;
+}
+
+button {
+  padding: 10px 12px;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.status {
+  min-height: 18px;
+  margin: 8px 0 0;
+  font-size: 12px;
+}
+
+.status.is-info {
+  color: #374151;
+}
+
+.status.is-success {
+  color: #166534;
+}
+
+.status.is-warning {
+  color: #9a3412;
+}
+
+.status.is-error {
+  color: #b91c1c;
+}
