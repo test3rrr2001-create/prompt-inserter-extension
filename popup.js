@@ -131,7 +131,12 @@ function updateFavoriteToggle() {
 }
 
 function renderCategoryOptions() {
-  const categories = [...new Set(allPrompts.map((prompt) => prompt.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ja"));
+  const PINNED_CATEGORY = "全社共通";
+  const categories = [...new Set(allPrompts.map((prompt) => prompt.category).filter(Boolean))].sort((a, b) => {
+    if (a === PINNED_CATEGORY) return -1;
+    if (b === PINNED_CATEGORY) return 1;
+    return a.localeCompare(b, "ja");
+  });
   categoryFilter.innerHTML = "";
 
   const allOption = document.createElement("option");
