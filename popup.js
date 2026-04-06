@@ -519,6 +519,7 @@ async function sendPromptToActiveTab(selected, text) {
   if (response && response.ok) {
     await recordRecentPrompt(selected.id);
     setStatus(STRINGS.insertSuccess(response.siteLabel), "success");
+    window.close();
     return;
   }
 

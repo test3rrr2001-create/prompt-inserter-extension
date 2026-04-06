@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Prompt Inserter MVP",
-  "version": "0.3.1",
-  "version_name": "0.3.1-variable-modal",
+  "version": "0.3.2",
+  "version_name": "0.3.2-auto-close",
   "description": "Insert prompts into Gemini, ChatGPT, and Claude with prefill variable modal support.",
   "permissions": [
     "activeTab",
