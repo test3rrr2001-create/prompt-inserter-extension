@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Prompt Inserter MVP",
-  "version": "0.2.3",
-  "version_name": "0.2.3-prompt-update",
-  "description": "Insert prompts from prompts.md into Gemini, ChatGPT, and Claude without auto-send.",
+  "version": "0.3.1",
+  "version_name": "0.3.1-variable-modal",
+  "description": "Insert prompts into Gemini, ChatGPT, and Claude with prefill variable modal support.",
   "permissions": [
     "activeTab",
     "scripting",

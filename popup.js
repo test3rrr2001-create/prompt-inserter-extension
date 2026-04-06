@@ -10,6 +10,7 @@ const insertButton = document.getElementById("insertButton");
 const statusElement = document.getElementById("status");
 const versionText = document.getElementById("versionText");
 const variableModal = document.getElementById("variableModal");
+const variableModalMeta = document.getElementById("variableModalMeta");
 const variableInputsContainer = document.getElementById("variableInputsContainer");
 const variableCancelButton = document.getElementById("variableCancelButton");
 const variableConfirmButton = document.getElementById("variableConfirmButton");
@@ -50,6 +51,7 @@ let focusedIndex = -1;
 let favoriteIds = [];
 let recentPromptIds = [];
 let isVariableModalOpen = false;
+let isConfirmingVariableInsert = false;
 let pendingInsertContext = null;
 
 function setStatus(message, kind = "info") {
@@ -165,6 +167,57 @@ function extractVariables(text) {
   return variableMatches;
 }
 
+function autoResizeTextarea(textarea) {
+  if (!textarea) {
+    return;
+  }
+
+  textarea.style.height = "auto";
+  textarea.style.height = `${Math.max(textarea.scrollHeight, 60)}px`;
+}
+
+function getVariableInputs() {
+  return variableInputsContainer
+    ? Array.from(variableInputsContainer.querySelectorAll("textarea[data-variable-token]"))
+    : [];
+}
+
+function updateVariableModalState() {
+  const inputs = getVariableInputs();
+  const filledCount = inputs.filter((input) => input.value.trim()).length;
+  const totalCount = inputs.length;
+
+  for (const input of inputs) {
+    input.classList.toggle("has-value", Boolean(input.value.trim()));
+    autoResizeTextarea(input);
+  }
+
+  if (variableModalMeta) {
+    variableModalMeta.textContent = totalCount > 0
+      ? `${filledCount} / ${totalCount} 入力済み  空欄はそのまま残ります  Ctrl+Enter ですぐ挿入`
+      : "";
+  }
+
+  if (variableConfirmButton && !isConfirmingVariableInsert) {
+    variableConfirmButton.textContent = totalCount > 0
+      ? `確定して挿入${filledCount > 0 ? ` (${filledCount}/${totalCount})` : ""}`
+      : "確定して挿入";
+  }
+}
+
+function setVariableConfirmBusyState(isBusy) {
+  isConfirmingVariableInsert = isBusy;
+
+  if (variableConfirmButton) {
+    variableConfirmButton.disabled = isBusy;
+    variableConfirmButton.textContent = isBusy ? "挿入中..." : "確定して挿入";
+  }
+
+  if (variableCancelButton) {
+    variableCancelButton.disabled = isBusy;
+  }
+}
+
 function updatePromptInfo() {
   if (!promptInfo) {
     return;
@@ -195,8 +248,17 @@ function renderCategoryOptions() {
     return;
   }
 
+  const PINNED_CATEGORY = "全社共通";
   const categories = [...new Set(allPrompts.map((prompt) => prompt.category).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, "ja"));
+    .sort((a, b) => {
+      if (a === PINNED_CATEGORY) {
+        return -1;
+      }
+      if (b === PINNED_CATEGORY) {
+        return 1;
+      }
+      return a.localeCompare(b, "ja");
+    });
 
   categoryFilter.innerHTML = "";
 
@@ -471,9 +533,14 @@ async function sendPromptToActiveTab(selected, text) {
 function closeVariableModal({ restoreFocus = true } = {}) {
   pendingInsertContext = null;
   isVariableModalOpen = false;
+  setVariableConfirmBusyState(false);
 
   if (variableInputsContainer) {
     variableInputsContainer.innerHTML = "";
+  }
+
+  if (variableModalMeta) {
+    variableModalMeta.textContent = "";
   }
 
   if (variableModal && typeof variableModal.close === "function" && variableModal.open) {
@@ -555,9 +622,28 @@ function openVariableModal(selected, variables) {
     textarea.dataset.variableToken = variable.token;
     textarea.setAttribute("aria-label", variable.label);
     textarea.placeholder = variable.label;
+    textarea.addEventListener("input", () => {
+      updateVariableModalState();
+    });
+    textarea.addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        if (!isConfirmingVariableInsert) {
+          setVariableConfirmBusyState(true);
+          confirmVariableInsert()
+            .catch(() => {
+              setStatus(STRINGS.insertActionError, "error");
+            })
+            .finally(() => {
+              setVariableConfirmBusyState(false);
+            });
+        }
+      }
+    });
 
     field.appendChild(label);
     field.appendChild(textarea);
+
     variableInputsContainer.appendChild(field);
   }
 
@@ -574,9 +660,12 @@ function openVariableModal(selected, variables) {
     variableModal.setAttribute("open", "open");
   }
 
+  updateVariableModalState();
+
   const firstTextarea = variableInputsContainer.querySelector("textarea");
   if (firstTextarea) {
     setTimeout(() => {
+      autoResizeTextarea(firstTextarea);
       firstTextarea.focus();
     }, 0);
   }
@@ -806,13 +895,13 @@ if (variableCancelButton) {
 
 if (variableConfirmButton) {
   variableConfirmButton.addEventListener("click", () => {
-    variableConfirmButton.disabled = true;
+    setVariableConfirmBusyState(true);
     confirmVariableInsert()
       .catch(() => {
         setStatus(STRINGS.insertActionError, "error");
       })
       .finally(() => {
-        variableConfirmButton.disabled = false;
+        setVariableConfirmBusyState(false);
       });
   });
 }
@@ -823,6 +912,14 @@ if (variableModal) {
     closeVariableModal();
     if (insertButton) {
       insertButton.disabled = filteredPrompts.length === 0;
+    }
+  });
+  variableModal.addEventListener("click", (event) => {
+    if (event.target === variableModal && !isConfirmingVariableInsert) {
+      closeVariableModal();
+      if (insertButton) {
+        insertButton.disabled = filteredPrompts.length === 0;
+      }
     }
   });
 }

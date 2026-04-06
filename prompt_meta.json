@@ -171,6 +171,15 @@
     "sortOrder": 190
   },
   {
+    "id": "prompt_business_reply_writer",
+    "fullTitle": "ビジネスメール返信文の作成",
+    "displayTitle": "メール返信作成",
+    "description": "相手の意図を汲み取りつつ、失礼なく簡潔で目的達成に直結する返信文を作るためのプロンプトです。",
+    "category": "全社共通",
+    "tags": ["メール", "返信", "コミュニケーション"],
+    "sortOrder": 185
+  },
+  {
     "id": "prompt_e3eaaab1",
     "fullTitle": "工業デザイン作成",
     "displayTitle": "工業デザイン作成",
