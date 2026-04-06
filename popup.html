@@ -44,7 +44,16 @@
 
         <div class="section-head">
           <p class="section-title">一覧</p>
-          <button id="favoriteToggle" class="icon-button" type="button" title="お気に入り切替" aria-label="お気に入り切替" aria-pressed="false">☆</button>
+          <button
+            id="favoriteToggle"
+            class="icon-button"
+            type="button"
+            title="お気に入りに追加"
+            aria-label="お気に入りに追加"
+            aria-pressed="false"
+          >
+            ☆
+          </button>
         </div>
 
         <p id="emptyState" class="empty-state" hidden>検索条件に一致するプロンプトがありません。</p>
@@ -53,11 +62,30 @@
 
       <section class="popup-footer">
         <p id="promptInfo" class="prompt-info" aria-live="polite"></p>
-        <p class="insert-hint">Enterキーでも挿入可能</p>
-        <button id="insertButton" type="button">入力欄へ挿入</button>
+        <p class="insert-hint">Enterキーで挿入できます</p>
+        <button id="insertButton" type="button">挿入</button>
         <p id="status" class="status" aria-live="polite"></p>
       </section>
     </main>
+
+    <dialog class="variable-modal" id="variableModal" aria-labelledby="variableModalTitle">
+      <form class="variable-modal-card" method="dialog">
+        <div class="variable-modal-head">
+          <h2 id="variableModalTitle" class="variable-modal-title">変数の入力</h2>
+          <p class="variable-modal-description">
+            プロンプト内の変数を入力してください（空欄のままでも挿入可能です）
+          </p>
+        </div>
+
+        <div id="variableInputsContainer" class="variable-inputs-container"></div>
+
+        <div class="variable-modal-actions">
+          <button id="variableCancelButton" class="button-secondary" type="button">キャンセル</button>
+          <button id="variableConfirmButton" type="button">確定＆挿入</button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="markdown.js"></script>
     <script src="popup.js"></script>
   </body>

@@ -9,6 +9,10 @@ const promptInfo = document.getElementById("promptInfo");
 const insertButton = document.getElementById("insertButton");
 const statusElement = document.getElementById("status");
 const versionText = document.getElementById("versionText");
+const variableModal = document.getElementById("variableModal");
+const variableInputsContainer = document.getElementById("variableInputsContainer");
+const variableCancelButton = document.getElementById("variableCancelButton");
+const variableConfirmButton = document.getElementById("variableConfirmButton");
 
 const STORAGE_KEYS = {
   favorites: "favorites",
@@ -16,6 +20,28 @@ const STORAGE_KEYS = {
 };
 
 const MAX_RECENT = 5;
+const STRINGS = {
+  categoryAll: "すべて",
+  favoriteAdd: "お気に入りに追加",
+  favoriteRemove: "お気に入りから解除",
+  favoriteAdded: "お気に入りに追加しました。",
+  favoriteRemoved: "お気に入りを解除しました。",
+  favoriteSaveError: "お気に入りの更新に失敗しました。",
+  insertReady: "対応タブで挿入できます。",
+  insertStart: "挿入を開始しています...",
+  insertSuccess: (siteLabel) => `${siteLabel} の入力欄に挿入しました。`,
+  insertNoSelection: "挿入するプロンプトを選択してください。",
+  insertUnsupported: "Gemini / ChatGPT / Claude のタブで使用してください。",
+  insertFailedFallback: "挿入できなかったため、クリップボードにコピーしました。",
+  insertInputMissingFallback: "入力欄が見つからなかったため、クリップボードにコピーしました。",
+  clipboardError: "コピーにも失敗しました。権限とページ状態を確認してください。",
+  insertActionError: "挿入処理に失敗しました。",
+  loadError: "データの読み込みに失敗しました。",
+  emptyPromptList: "条件に一致するプロンプトがありません。",
+  variableTitle: "変数の入力",
+  variableDescription: "プロンプト内の変数を入力してください（空欄のままでも挿入可能です）",
+  variableInputError: "変数入力欄の生成に失敗しました。"
+};
 
 let allPrompts = [];
 let filteredPrompts = [];
@@ -23,9 +49,15 @@ let selectedPromptId = "";
 let focusedIndex = -1;
 let favoriteIds = [];
 let recentPromptIds = [];
+let isVariableModalOpen = false;
+let pendingInsertContext = null;
 
 function setStatus(message, kind = "info") {
-  statusElement.textContent = message;
+  if (!statusElement) {
+    return;
+  }
+
+  statusElement.textContent = message || "";
   statusElement.className = `status is-${kind}`;
 }
 
@@ -38,11 +70,8 @@ function normalizeText(text) {
 }
 
 function createFallbackDisplayTitle(prompt) {
-  const source = (prompt.fullTitle || "").trim();
-  return source
-    .replace(/^\d+\.\s*/, "")
-    .replace(/\s*（[^）]*）\s*$/, "")
-    .trim();
+  const source = (prompt?.fullTitle || prompt?.promptTitle || "").trim();
+  return source.replace(/^\d+\.\s*/, "").trim();
 }
 
 function comparePrompts(a, b) {
@@ -53,7 +82,7 @@ function comparePrompts(a, b) {
     return orderA - orderB;
   }
 
-  return a.displayTitle.localeCompare(b.displayTitle, "ja");
+  return (a.displayTitle || "").localeCompare(b.displayTitle || "", "ja");
 }
 
 function getPromptById(promptId) {
@@ -61,9 +90,11 @@ function getPromptById(promptId) {
 }
 
 function getHoverTitle(prompt) {
-  return prompt && prompt.category
-    ? `${prompt.category}｜${prompt.fullTitle}`
-    : prompt ? prompt.fullTitle : "";
+  if (!prompt) {
+    return "";
+  }
+
+  return prompt.category ? `${prompt.category} / ${prompt.fullTitle}` : (prompt.fullTitle || "");
 }
 
 function getInfoText(prompt) {
@@ -76,11 +107,7 @@ function getInfoText(prompt) {
   }
 
   const hoverTitle = getHoverTitle(prompt);
-  if (hoverTitle) {
-    return hoverTitle;
-  }
-
-  return prompt.displayTitle;
+  return hoverTitle || prompt.displayTitle || "";
 }
 
 function isFavorite(promptId) {
@@ -113,35 +140,69 @@ function setStorage(data) {
   return chrome.storage.local.set(data);
 }
 
+function extractVariables(text) {
+  const variableMatches = [];
+  const seen = new Set();
+  const pattern = /\[([^\]]+)\](?!\()/g;
+  const source = String(text || "");
+  let match;
+
+  while ((match = pattern.exec(source)) !== null) {
+    const fullMatch = match[0];
+    const variableName = (match[1] || "").trim();
+
+    if (!variableName || seen.has(fullMatch)) {
+      continue;
+    }
+
+    seen.add(fullMatch);
+    variableMatches.push({
+      token: fullMatch,
+      label: variableName
+    });
+  }
+
+  return variableMatches;
+}
+
 function updatePromptInfo() {
+  if (!promptInfo) {
+    return;
+  }
+
   const selected = getPromptById(selectedPromptId);
-  const hoverTitle = selected ? getHoverTitle(selected) : "";
   promptInfo.textContent = getInfoText(selected);
-  promptInfo.title = hoverTitle;
+  promptInfo.title = selected ? getHoverTitle(selected) : "";
 }
 
 function updateFavoriteToggle() {
+  if (!favoriteToggle) {
+    return;
+  }
+
   const selected = getPromptById(selectedPromptId);
   const active = selected ? isFavorite(selected.id) : false;
   favoriteToggle.disabled = !selected;
   favoriteToggle.textContent = active ? "★" : "☆";
   favoriteToggle.classList.toggle("is-active", active);
   favoriteToggle.setAttribute("aria-pressed", String(active));
-  favoriteToggle.title = active ? "お気に入り解除" : "お気に入り登録";
+  favoriteToggle.title = active ? STRINGS.favoriteRemove : STRINGS.favoriteAdd;
+  favoriteToggle.setAttribute("aria-label", active ? STRINGS.favoriteRemove : STRINGS.favoriteAdd);
 }
 
 function renderCategoryOptions() {
-  const PINNED_CATEGORY = "全社共通";
-  const categories = [...new Set(allPrompts.map((prompt) => prompt.category).filter(Boolean))].sort((a, b) => {
-    if (a === PINNED_CATEGORY) return -1;
-    if (b === PINNED_CATEGORY) return 1;
-    return a.localeCompare(b, "ja");
-  });
+  if (!categoryFilter) {
+    return;
+  }
+
+  const categories = [...new Set(allPrompts.map((prompt) => prompt.category).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "ja"));
+
   categoryFilter.innerHTML = "";
 
   const allOption = document.createElement("option");
   allOption.value = "";
-  allOption.textContent = "すべて";
+  allOption.textContent = STRINGS.categoryAll;
   categoryFilter.appendChild(allOption);
 
   for (const category of categories) {
@@ -153,6 +214,10 @@ function renderCategoryOptions() {
 }
 
 function renderChipList(container, promptIds, type) {
+  if (!container || !searchInput || !categoryFilter) {
+    return;
+  }
+
   container.innerHTML = "";
 
   for (const promptId of promptIds) {
@@ -177,26 +242,26 @@ function renderChipList(container, promptIds, type) {
 }
 
 function renderShortcutSections() {
+  if (!favoriteSection) {
+    return;
+  }
+
   const validFavorites = favoriteIds.filter((promptId) => getPromptById(promptId));
-
   favoriteSection.hidden = validFavorites.length === 0;
-
   renderChipList(favoriteList, validFavorites, "favorite");
 }
 
 function matchesFilters(prompt) {
-  const query = normalizeText(searchInput.value);
-  const category = categoryFilter.value;
+  const query = normalizeText(searchInput?.value);
+  const category = categoryFilter?.value || "";
 
   if (query) {
-    const haystack = normalizeText(
-      [
-        prompt.displayTitle,
-        prompt.fullTitle,
-        prompt.description,
-        prompt.category
-      ].join("\n")
-    );
+    const haystack = normalizeText([
+      prompt.displayTitle,
+      prompt.fullTitle,
+      prompt.description,
+      prompt.category
+    ].join("\n"));
 
     if (!haystack.includes(query)) {
       return false;
@@ -221,21 +286,17 @@ function applyFilters() {
   renderPromptList();
 }
 
-function ensureSelectedVisible() {
-  if (!filteredPrompts.some((prompt) => prompt.id === selectedPromptId)) {
+function renderPromptList() {
+  if (!promptList || !emptyState || !insertButton || !promptInfo) {
     return;
   }
 
-  focusedIndex = filteredPrompts.findIndex((prompt) => prompt.id === selectedPromptId);
-}
-
-function renderPromptList() {
   promptList.innerHTML = "";
 
   if (!filteredPrompts.length) {
     emptyState.hidden = false;
     insertButton.disabled = true;
-    promptInfo.textContent = "検索条件を変えてください。";
+    promptInfo.textContent = STRINGS.emptyPromptList;
     promptInfo.title = "";
     updateFavoriteToggle();
     return;
@@ -248,6 +309,7 @@ function renderPromptList() {
     const item = document.createElement("div");
     const selected = prompt.id === selectedPromptId;
     const focused = index === focusedIndex;
+
     item.className = `list-item${selected ? " is-selected" : ""}${focused ? " is-focused" : ""}`;
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(selected));
@@ -263,7 +325,7 @@ function renderPromptList() {
 
     const category = document.createElement("div");
     category.className = "item-category";
-    category.textContent = prompt.category;
+    category.textContent = prompt.category || "";
 
     body.appendChild(title);
     body.appendChild(category);
@@ -272,12 +334,13 @@ function renderPromptList() {
     favoriteButton.type = "button";
     favoriteButton.className = `item-favorite${isFavorite(prompt.id) ? " is-active" : ""}`;
     favoriteButton.textContent = isFavorite(prompt.id) ? "★" : "☆";
-    favoriteButton.title = isFavorite(prompt.id) ? "お気に入り解除" : "お気に入り登録";
+    favoriteButton.title = isFavorite(prompt.id) ? STRINGS.favoriteRemove : STRINGS.favoriteAdd;
+    favoriteButton.setAttribute("aria-label", favoriteButton.title);
     favoriteButton.addEventListener("click", (event) => {
       event.stopPropagation();
       selectedPromptId = prompt.id;
       toggleFavoriteForSelected().catch(() => {
-        setStatus("お気に入りの保存に失敗しました。", "error");
+        setStatus(STRINGS.favoriteSaveError, "error");
       });
     });
 
@@ -330,10 +393,10 @@ async function toggleFavoriteForSelected() {
 
   if (isFavorite(selected.id)) {
     favoriteIds = favoriteIds.filter((promptId) => promptId !== selected.id);
-    setStatus("お気に入りを解除しました。", "info");
+    setStatus(STRINGS.favoriteRemoved, "info");
   } else {
     favoriteIds = [selected.id, ...favoriteIds.filter((promptId) => promptId !== selected.id)];
-    setStatus("お気に入りに追加しました。", "success");
+    setStatus(STRINGS.favoriteAdded, "success");
   }
 
   await saveFavorites();
@@ -356,65 +419,193 @@ async function copyToClipboard(text) {
   await navigator.clipboard.writeText(text);
 }
 
-async function handleCopyFallback(selected, message) {
+async function handleCopyFallback(prompt, text, message) {
   try {
-    await copyToClipboard(selected.body);
-    await recordRecentPrompt(selected.id);
+    await copyToClipboard(text);
+    await recordRecentPrompt(prompt.id);
     setStatus(message, "warning");
   } catch (error) {
-    setStatus("コピーにも失敗しました。もう一度お試しください。", "error");
+    setStatus(STRINGS.clipboardError, "error");
+  }
+}
+
+async function sendPromptToActiveTab(selected, text) {
+  const tab = await getActiveTab();
+
+  if (!tab || !tab.id) {
+    throw new Error("active_tab_not_found");
+  }
+
+  if (!isSupportedUrl(tab.url)) {
+    setStatus(STRINGS.insertUnsupported, "warning");
+    return;
+  }
+
+  await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    files: ["inject.js"]
+  });
+
+  const response = await chrome.tabs.sendMessage(tab.id, {
+    type: "INSERT_PROMPT",
+    payload: {
+      title: selected.fullTitle,
+      text
+    }
+  });
+
+  if (response && response.ok) {
+    await recordRecentPrompt(selected.id);
+    setStatus(STRINGS.insertSuccess(response.siteLabel), "success");
+    return;
+  }
+
+  if (response && response.reason === "input_not_found") {
+    await handleCopyFallback(selected, text, STRINGS.insertInputMissingFallback);
+    return;
+  }
+
+  await handleCopyFallback(selected, text, STRINGS.insertFailedFallback);
+}
+
+function closeVariableModal({ restoreFocus = true } = {}) {
+  pendingInsertContext = null;
+  isVariableModalOpen = false;
+
+  if (variableInputsContainer) {
+    variableInputsContainer.innerHTML = "";
+  }
+
+  if (variableModal && typeof variableModal.close === "function" && variableModal.open) {
+    variableModal.close();
+  }
+
+  if (restoreFocus && insertButton) {
+    setTimeout(() => {
+      insertButton.focus();
+    }, 0);
+  }
+}
+
+function buildResolvedPromptText(template, inputs) {
+  let resolved = template;
+
+  for (const input of inputs) {
+    const token = input.dataset.variableToken || "";
+    const value = input.value || "";
+
+    if (!token || !value) {
+      continue;
+    }
+
+    resolved = resolved.split(token).join(value);
+  }
+
+  return resolved;
+}
+
+async function confirmVariableInsert() {
+  if (!pendingInsertContext || !pendingInsertContext.selected) {
+    closeVariableModal();
+    insertButton.disabled = filteredPrompts.length === 0;
+    return;
+  }
+
+  const { selected, templateText } = pendingInsertContext;
+  const inputs = variableInputsContainer
+    ? Array.from(variableInputsContainer.querySelectorAll("textarea[data-variable-token]"))
+    : [];
+  const resolvedText = buildResolvedPromptText(templateText, inputs);
+
+  closeVariableModal({ restoreFocus: false });
+  setStatus(STRINGS.insertStart, "info");
+
+  try {
+    await sendPromptToActiveTab(selected, resolvedText);
+  } catch (error) {
+    await handleCopyFallback(selected, resolvedText, STRINGS.insertFailedFallback);
+  } finally {
+    if (insertButton) {
+      insertButton.disabled = filteredPrompts.length === 0;
+      insertButton.focus();
+    }
+  }
+}
+
+function openVariableModal(selected, variables) {
+  if (!variableModal || !variableInputsContainer || !variableConfirmButton || !insertButton) {
+    setStatus(STRINGS.variableInputError, "error");
+    insertButton.disabled = filteredPrompts.length === 0;
+    return;
+  }
+
+  variableInputsContainer.innerHTML = "";
+
+  for (const variable of variables) {
+    const field = document.createElement("label");
+    field.className = "variable-field";
+
+    const label = document.createElement("span");
+    label.className = "variable-label";
+    label.textContent = variable.token;
+
+    const textarea = document.createElement("textarea");
+    textarea.className = "variable-textarea";
+    textarea.rows = 3;
+    textarea.dataset.variableToken = variable.token;
+    textarea.setAttribute("aria-label", variable.label);
+    textarea.placeholder = variable.label;
+
+    field.appendChild(label);
+    field.appendChild(textarea);
+    variableInputsContainer.appendChild(field);
+  }
+
+  pendingInsertContext = {
+    selected,
+    templateText: selected.body,
+    variables
+  };
+  isVariableModalOpen = true;
+
+  if (typeof variableModal.showModal === "function") {
+    variableModal.showModal();
+  } else {
+    variableModal.setAttribute("open", "open");
+  }
+
+  const firstTextarea = variableInputsContainer.querySelector("textarea");
+  if (firstTextarea) {
+    setTimeout(() => {
+      firstTextarea.focus();
+    }, 0);
   }
 }
 
 async function insertSelectedPrompt() {
   const selected = getPromptById(selectedPromptId);
   if (!selected) {
-    setStatus("プロンプトを選択してください。", "warning");
+    setStatus(STRINGS.insertNoSelection, "warning");
+    return;
+  }
+
+  if (!insertButton) {
     return;
   }
 
   insertButton.disabled = true;
-  setStatus("入力欄を探しています...", "info");
+  setStatus(STRINGS.insertStart, "info");
+
+  const variables = extractVariables(selected.body);
+  if (variables.length > 0) {
+    openVariableModal(selected, variables);
+    return;
+  }
 
   try {
-    const tab = await getActiveTab();
-
-    if (!tab || !tab.id) {
-      throw new Error("active_tab_not_found");
-    }
-
-    if (!isSupportedUrl(tab.url)) {
-      setStatus("Gemini / ChatGPT / Claude のタブで使ってください。", "warning");
-      return;
-    }
-
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["inject.js"]
-    });
-
-    const response = await chrome.tabs.sendMessage(tab.id, {
-      type: "INSERT_PROMPT",
-      payload: {
-        title: selected.fullTitle,
-        text: selected.body
-      }
-    });
-
-    if (response && response.ok) {
-      await recordRecentPrompt(selected.id);
-      setStatus(`${response.siteLabel} の入力欄へ挿入しました。`, "success");
-      return;
-    }
-
-    if (response && response.reason === "input_not_found") {
-      await handleCopyFallback(selected, "入力欄が見つからなかったため、コピーしました。");
-      return;
-    }
-
-    await handleCopyFallback(selected, "挿入できなかったため、コピーしました。");
+    await sendPromptToActiveTab(selected, selected.body);
   } catch (error) {
-    await handleCopyFallback(selected, "挿入できなかったため、コピーしました。");
+    await handleCopyFallback(selected, selected.body, STRINGS.insertFailedFallback);
   } finally {
     insertButton.disabled = filteredPrompts.length === 0;
   }
@@ -436,6 +627,10 @@ function moveSelection(delta) {
 }
 
 function clearSearchState() {
+  if (!searchInput || !categoryFilter) {
+    return;
+  }
+
   const hadQuery = Boolean(searchInput.value);
   const hadCategory = Boolean(categoryFilter.value);
 
@@ -449,6 +644,17 @@ function clearSearchState() {
 }
 
 function handleGlobalKeydown(event) {
+  if (isVariableModalOpen) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeVariableModal();
+      if (insertButton) {
+        insertButton.disabled = filteredPrompts.length === 0;
+      }
+    }
+    return;
+  }
+
   if (document.activeElement === categoryFilter) {
     if (event.key === "Escape") {
       event.preventDefault();
@@ -472,8 +678,10 @@ function handleGlobalKeydown(event) {
   if (event.key === "Enter" && document.activeElement !== favoriteToggle) {
     event.preventDefault();
     insertSelectedPrompt().catch(() => {
-      setStatus("処理に失敗しました。", "error");
-      insertButton.disabled = filteredPrompts.length === 0;
+      setStatus(STRINGS.insertActionError, "error");
+      if (insertButton) {
+        insertButton.disabled = filteredPrompts.length === 0;
+      }
     });
     return;
   }
@@ -512,7 +720,9 @@ async function loadPromptMeta() {
 function mergePromptData(parsedPrompts, promptMeta) {
   return parsedPrompts
     .map((prompt) => {
-      const meta = promptMeta.metaById.get(prompt.id) || promptMeta.metaByFullTitle.get(prompt.fullTitle) || null;
+      const meta = promptMeta.metaById.get(prompt.id)
+        || promptMeta.metaByFullTitle.get(prompt.fullTitle)
+        || null;
 
       return {
         id: meta?.id || prompt.id,
@@ -539,12 +749,10 @@ async function loadPrompts() {
   const parsedPrompts = window.parsePrompts(markdown);
   allPrompts = mergePromptData(parsedPrompts, promptMeta);
 
-  console.log(`[Prompt Inserter] recognized prompts: ${allPrompts.length}`);
-  if (allPrompts.length === 0 || allPrompts.length < 10 || allPrompts.length > 30) {
-    console.warn("[Prompt Inserter] unexpected prompt count", allPrompts.length);
+  if (versionText) {
+    versionText.textContent = `v${chrome.runtime.getManifest().version}`;
   }
 
-  versionText.textContent = `v${chrome.runtime.getManifest().version}`;
   renderCategoryOptions();
   renderShortcutSections();
 
@@ -553,31 +761,83 @@ async function loadPrompts() {
     || (allPrompts[0] ? allPrompts[0].id : "");
 
   applyFilters();
-  setStatus("対象タブで挿入します。", "info");
+  setStatus(STRINGS.insertReady, "info");
 
-  setTimeout(() => {
-    searchInput.focus();
-  }, 0);
+  if (searchInput) {
+    setTimeout(() => {
+      searchInput.focus();
+    }, 0);
+  }
 }
 
-searchInput.addEventListener("input", applyFilters);
-categoryFilter.addEventListener("change", applyFilters);
-favoriteToggle.addEventListener("click", () => {
-  toggleFavoriteForSelected().catch(() => {
-    setStatus("お気に入りの保存に失敗しました。", "error");
+if (searchInput) {
+  searchInput.addEventListener("input", applyFilters);
+}
+
+if (categoryFilter) {
+  categoryFilter.addEventListener("change", applyFilters);
+}
+
+if (favoriteToggle) {
+  favoriteToggle.addEventListener("click", () => {
+    toggleFavoriteForSelected().catch(() => {
+      setStatus(STRINGS.favoriteSaveError, "error");
+    });
   });
-});
-insertButton.addEventListener("click", () => {
-  insertSelectedPrompt().catch(() => {
-    setStatus("処理に失敗しました。", "error");
-    insertButton.disabled = filteredPrompts.length === 0;
+}
+
+if (insertButton) {
+  insertButton.addEventListener("click", () => {
+    insertSelectedPrompt().catch(() => {
+      setStatus(STRINGS.insertActionError, "error");
+      insertButton.disabled = filteredPrompts.length === 0;
+    });
   });
-});
+}
+
+if (variableCancelButton) {
+  variableCancelButton.addEventListener("click", () => {
+    closeVariableModal();
+    if (insertButton) {
+      insertButton.disabled = filteredPrompts.length === 0;
+    }
+  });
+}
+
+if (variableConfirmButton) {
+  variableConfirmButton.addEventListener("click", () => {
+    variableConfirmButton.disabled = true;
+    confirmVariableInsert()
+      .catch(() => {
+        setStatus(STRINGS.insertActionError, "error");
+      })
+      .finally(() => {
+        variableConfirmButton.disabled = false;
+      });
+  });
+}
+
+if (variableModal) {
+  variableModal.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeVariableModal();
+    if (insertButton) {
+      insertButton.disabled = filteredPrompts.length === 0;
+    }
+  });
+}
+
 document.addEventListener("keydown", handleGlobalKeydown);
 
 loadPrompts().catch(() => {
-  insertButton.disabled = true;
-  favoriteToggle.disabled = true;
-  promptInfo.textContent = "";
-  setStatus("データの読み込みに失敗しました。", "error");
+  if (insertButton) {
+    insertButton.disabled = true;
+  }
+  if (favoriteToggle) {
+    favoriteToggle.disabled = true;
+  }
+  if (promptInfo) {
+    promptInfo.textContent = "";
+  }
+  setStatus(STRINGS.loadError, "error");
 });
