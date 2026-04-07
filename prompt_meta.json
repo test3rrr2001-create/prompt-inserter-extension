@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "id": "prompt_6b5e92c3",
     "fullTitle": "初回商談の完全準備（顧客の深層課題と反論の事前ハック）",
@@ -205,5 +205,15 @@
     "category": "全社共通",
     "tags": ["引き継ぎ", "文脈圧縮", "効率化"],
     "sortOrder": 195
+  }
+,
+  {
+    "id": "prompt_deep_market_research",
+    "fullTitle": "DEEP 市場調査レポート作成",
+    "displayTitle": "DEEP 市場調査",
+    "description": "日本語・英語の一次ソースを横断参照し、市場規模、競争環境、成長ドライバー、リスク、今後3年の展望までを整理する Deep Research 向けプロンプトです。",
+    "category": "Deep Research",
+    "tags": ["市場調査", "Deep Research", "リサーチ"],
+    "sortOrder": 220
   }
 ]

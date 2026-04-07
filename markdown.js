@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   const EXCLUDED_H2_TITLES = new Set([
     "目次",
     "プロンプトの精度を劇的に高める重要テクニック：XMLタグの活用"

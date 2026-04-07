@@ -1,4 +1,4 @@
-const searchInput = document.getElementById("searchInput");
+﻿const searchInput = document.getElementById("searchInput");
 const categoryFilter = document.getElementById("categoryFilter");
 const favoriteSection = document.getElementById("favoriteSection");
 const favoriteList = document.getElementById("favoriteList");
@@ -21,6 +21,31 @@ const STORAGE_KEYS = {
 };
 
 const MAX_RECENT = 5;
+const DEFAULT_OUTPUT_FORMAT_DEEP_MARKET_RESEARCH = `# [出力形式]
+以下の構成で最終回答を出力してください。
+
+## 1. サマリー
+200文字程度で、調査結果の核心を簡潔に要約してください。
+
+## 2. 市場分析詳細（表形式）
+| 項目 | 内容・現状 | 出典（URLまたは組織名） |
+| :--- | :--- | :--- |
+| 市場規模・成長率 | [具体的数値] | [出典] |
+| 主要競合プレイヤー | [トップ企業の動向] | [出典] |
+| 成長ドライバー | [市場を牽引する要因] | [出典] |
+| 阻害要因・リスク | [規制、技術的課題等] | [出典] |
+
+## 3. 今後3年の予測と戦略的展望
+- **Short-term (1年目)**: 直近のトレンド予測
+- **Mid-term (2-3年目)**: 中期的な構造変化
+- **Strategic Insight**: この市場で勝ち残るための「代替アプローチ」または「最小検証ステップ（MVP）」の提案`;
+
+const PROMPT_VARIABLE_DEFAULTS = {
+  "DEEP 市場調査レポート作成": {
+    "[出力形式（任意・未入力ならデフォルト形式を使用）]": DEFAULT_OUTPUT_FORMAT_DEEP_MARKET_RESEARCH
+  }
+};
+
 const STRINGS = {
   categoryAll: "すべて",
   favoriteAdd: "お気に入りに追加",
@@ -560,13 +585,16 @@ function buildResolvedPromptText(template, inputs) {
 
   for (const input of inputs) {
     const token = input.dataset.variableToken || "";
+    const promptTitle = input.dataset.promptTitle || "";
     const value = input.value || "";
+    const fallbackValue = PROMPT_VARIABLE_DEFAULTS[promptTitle]?.[token] || "";
+    const resolvedValue = value || fallbackValue;
 
-    if (!token || !value) {
+    if (!token || !resolvedValue) {
       continue;
     }
 
-    resolved = resolved.split(token).join(value);
+    resolved = resolved.split(token).join(resolvedValue);
   }
 
   return resolved;
@@ -620,6 +648,7 @@ function openVariableModal(selected, variables) {
     const textarea = document.createElement("textarea");
     textarea.className = "variable-textarea";
     textarea.rows = 3;
+    textarea.dataset.promptTitle = selected.fullTitle || "";
     textarea.dataset.variableToken = variable.token;
     textarea.setAttribute("aria-label", variable.label);
     textarea.placeholder = variable.label;
