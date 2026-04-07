@@ -21,6 +21,25 @@ const STORAGE_KEYS = {
 };
 
 const MAX_RECENT = 5;
+const DEFAULT_BASE_PROMPT_DEEP_MARKET_RESEARCH = `# [前提条件]
+あなたは、世界トップクラスの戦略コンサルティングファームに所属する、極めて優秀な「シニア・市場アナリスト」です。複雑な情報を構造化し、実行可能なインサイトを抽出する専門家として振る舞ってください。
+
+# [目的]
+指定された調査テーマについて、日本語および英語の信頼できる最新ソースを横断的に分析し、市場の現状と将来展望を網羅した高精度なレポートを作成すること。
+
+# [制約条件]
+- **調査範囲**: 日本語および英語の一次ソース（公的機関、主要シンクタンク、大手テック企業のIR資料等）を必ず参照すること。
+- **エビデンス**: 数値データには必ず出典（ソース元と公開年）を明記すること。
+- **論理構成**: 結論を出す前に、内部で「思考プロセス」を展開し、ハルシネーションを防ぐこと。
+- **トーン**: プロフェッショナルかつ客観的であること。過度な装飾は避け、事実に基づいた分析に徹すること。`;
+
+const DEFAULT_REASONING_DEEP_MARKET_RESEARCH = `# [思考プロセス / ステップ]
+AIは回答を生成する際、以下のステップ（Reasoning & Acting）を順に実行してください。
+
+1. **Thought（推論）**: 入力されたテーマに対し、日本語・英語それぞれの言語圏でどのようなキーワードで検索・分析すべきか戦略を立てる。
+2. **Analysis（分析）**: 抽出したデータから、市場規模、主要プレイヤー、成長要因、リスク要因を整理する。
+3. **Synthesis（統合）**: 矛盾するデータがある場合はその旨を明記し、最も信頼性の高い推計を採用する。`;
+
 const DEFAULT_OUTPUT_FORMAT_DEEP_MARKET_RESEARCH = `# [出力形式]
 以下の構成で最終回答を出力してください。
 
@@ -42,6 +61,8 @@ const DEFAULT_OUTPUT_FORMAT_DEEP_MARKET_RESEARCH = `# [出力形式]
 
 const PROMPT_VARIABLE_DEFAULTS = {
   "DEEP 市場調査レポート作成": {
+    "__prepend__": DEFAULT_BASE_PROMPT_DEEP_MARKET_RESEARCH,
+    "[思考プロセス追加（任意）]": DEFAULT_REASONING_DEEP_MARKET_RESEARCH,
     "[出力形式（任意・未入力ならデフォルト形式を使用）]": DEFAULT_OUTPUT_FORMAT_DEEP_MARKET_RESEARCH
   }
 };
@@ -582,12 +603,13 @@ function closeVariableModal({ restoreFocus = true } = {}) {
 
 function buildResolvedPromptText(template, inputs) {
   let resolved = template;
+  const promptTitle = inputs[0]?.dataset.promptTitle || "";
+  const prependText = PROMPT_VARIABLE_DEFAULTS[promptTitle]?.__prepend__ || "";
 
   for (const input of inputs) {
     const token = input.dataset.variableToken || "";
-    const promptTitle = input.dataset.promptTitle || "";
     const value = input.value || "";
-    const fallbackValue = PROMPT_VARIABLE_DEFAULTS[promptTitle]?.[token] || "";
+    const fallbackValue = PROMPT_VARIABLE_DEFAULTS[input.dataset.promptTitle || ""]?.[token] || "";
     const resolvedValue = value || fallbackValue;
 
     if (!token || !resolvedValue) {
@@ -595,6 +617,10 @@ function buildResolvedPromptText(template, inputs) {
     }
 
     resolved = resolved.split(token).join(resolvedValue);
+  }
+
+  if (prependText) {
+    return `${prependText}\n\n${resolved}`;
   }
 
   return resolved;
