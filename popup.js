@@ -1,4 +1,4 @@
-﻿const searchInput = document.getElementById("searchInput");
+const searchInput = document.getElementById("searchInput");
 const categoryFilter = document.getElementById("categoryFilter");
 const favoriteSection = document.getElementById("favoriteSection");
 const favoriteList = document.getElementById("favoriteList");
