@@ -262,7 +262,7 @@
   {
     "id": "prompt_trip_report_summary",
     "fullTitle": "NotebookLM要約ベースの出張報告書作成",
-    "displayTitle": "出張報告書",
+    "displayTitle": "出張報告書（NotebookLM）",
     "description": "NotebookLMの要約を基に、経営層向けに結果・今後・所感を分離した高密度な出張報告書を作るためのプロンプトです。",
     "category": "全社共通",
     "tags": [

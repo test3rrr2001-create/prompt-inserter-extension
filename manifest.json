@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "プロンプト入力支援",
-  "version": "0.3.3",
-  "version_name": "0.3.3-renamed",
+  "version": "0.3.4",
+  "version_name": "0.3.4-notebooklm-trip-report",
   "description": "Insert prompts into Gemini, ChatGPT, and Claude with prefill variable modal support.",
   "permissions": [
     "activeTab",
