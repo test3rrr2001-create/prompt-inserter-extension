@@ -78,7 +78,7 @@ const STRINGS = {
   insertStart: "挿入を開始しています...",
   insertSuccess: (siteLabel) => `${siteLabel} の入力欄に挿入しました。`,
   insertNoSelection: "挿入するプロンプトを選択してください。",
-  insertUnsupported: "Gemini / ChatGPT / Claude のタブで使用してください。",
+  insertUnsupported: "Gemini / ChatGPT / Claude / NotebookLM のタブで使用してください。",
   insertFailedFallback: "挿入できなかったため、クリップボードにコピーしました。",
   insertInputMissingFallback: "入力欄が見つからなかったため、クリップボードにコピーしました。",
   clipboardError: "コピーにも失敗しました。権限とページ状態を確認してください。",
@@ -171,6 +171,8 @@ function isSupportedUrl(url) {
     const { hostname } = new URL(url);
     return (
       hostname.includes("gemini.google.com") ||
+      hostname.includes("notebooklm.google.com") ||
+      hostname.includes("notebooklm.google") ||
       hostname.includes("chatgpt.com") ||
       hostname.includes("chat.openai.com") ||
       hostname.includes("claude.ai")

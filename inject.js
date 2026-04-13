@@ -28,6 +28,10 @@
       return "Gemini";
     }
 
+    if (host.includes("notebooklm.google.com") || host.includes("notebooklm.google")) {
+      return "NotebookLM";
+    }
+
     if (host.includes("chatgpt.com") || host.includes("chat.openai.com")) {
       return "ChatGPT";
     }
@@ -39,25 +43,107 @@
     return "対象サイト";
   }
 
-  function findInput() {
-    const selectors = [
+  function getSelectorsForCurrentSite() {
+    const host = window.location.hostname;
+
+    if (host.includes("notebooklm.google.com") || host.includes("notebooklm.google")) {
+      return [
+        "textarea[aria-label*='Ask']",
+        "textarea[aria-label*='ask']",
+        "textarea[placeholder*='Ask']",
+        "textarea[placeholder*='ask']",
+        "div[role='textbox'][contenteditable='true'][aria-label*='Ask']",
+        "div[role='textbox'][contenteditable='true'][aria-label*='ask']",
+        "textarea",
+        "div[role='textbox'][contenteditable='true']",
+        "div[contenteditable='true']"
+      ];
+    }
+
+    return [
       "rich-textarea div[contenteditable='true']",
       "div.ql-editor[contenteditable='true']",
       "#prompt-textarea",
       "div[contenteditable='true'][data-testid='composer-text-input']",
       ".ProseMirror[contenteditable='true']",
+      "textarea[aria-label*='message']",
+      "textarea[aria-label*='Message']",
+      "textarea[placeholder*='message']",
+      "textarea[placeholder*='Message']",
       "textarea",
+      "div[role='textbox'][contenteditable='true']",
       "div[contenteditable='true']"
     ];
+  }
+
+  function getCandidateScore(element) {
+    if (!element || !isVisible(element)) {
+      return Number.NEGATIVE_INFINITY;
+    }
+
+    const rect = element.getBoundingClientRect();
+    const textHints = [
+      element.getAttribute("aria-label") || "",
+      element.getAttribute("placeholder") || "",
+      element.getAttribute("data-testid") || "",
+      element.getAttribute("role") || ""
+    ].join(" ").toLowerCase();
+
+    let score = 0;
+
+    if (element instanceof HTMLTextAreaElement) {
+      score += 40;
+    }
+
+    if (element.getAttribute("role") === "textbox") {
+      score += 25;
+    }
+
+    if (element.getAttribute("contenteditable") === "true") {
+      score += 20;
+    }
+
+    if (/(ask|chat|message|prompt|query|質問|チャット)/.test(textHints)) {
+      score += 50;
+    }
+
+    if (rect.bottom > window.innerHeight * 0.55) {
+      score += 20;
+    }
+
+    score += Math.min(rect.width, window.innerWidth) / 50;
+    score += Math.min(rect.height, 200) / 20;
+
+    if (element.disabled || element.getAttribute("aria-disabled") === "true") {
+      score -= 1000;
+    }
+
+    if (element.readOnly || element.getAttribute("readonly") !== null) {
+      score -= 1000;
+    }
+
+    return score;
+  }
+
+  function findInput() {
+    const selectors = getSelectorsForCurrentSite();
+    let bestElement = null;
+    let bestScore = Number.NEGATIVE_INFINITY;
 
     for (const selector of selectors) {
       const elements = Array.from(document.querySelectorAll(selector)).filter(isVisible);
-      if (elements.length) {
-        return elements[elements.length - 1];
+
+      for (const element of elements) {
+        const score = getCandidateScore(element);
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestElement = element;
+        }
       }
     }
 
-    return null;
+    return bestElement;
   }
 
   function setNativeValue(element, value) {

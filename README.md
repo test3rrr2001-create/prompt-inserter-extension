@@ -1,6 +1,6 @@
 # プロンプト入力支援 (Prompt Inserter)
 
-`prompts.md` に保存したプロンプトを Chrome 拡張の popup から選び、Gemini / ChatGPT / Claude の入力欄へ挿入する Chrome 拡張です。
+`prompts.md` に保存したプロンプトを Chrome 拡張の popup から選び、Gemini / ChatGPT / Claude / NotebookLM の入力欄へ挿入する Chrome 拡張です。
 プレースホルダーを含むプロンプトは、挿入前にモーダルで変数入力できます。
 
 ## ファイル構成
@@ -24,7 +24,7 @@
 - プロンプト本文内の `[変数名]` は挿入前に自動抽出し、モーダルで入力できる
 - Markdown リンク形式 `[テキスト](URL)` は変数抽出の対象外
 - 変数入力モーダルは `Ctrl+Enter` で確定できる
-- 対象は Gemini / ChatGPT / Claude
+- 対象は Gemini / ChatGPT / Claude / NotebookLM
 - 入力欄が見つからない場合はクリップボードへコピー
 - 自動送信はしない
 - 外部ライブラリは使わない
@@ -34,7 +34,7 @@
 1. Chrome の拡張機能ページでデベロッパーモードを有効にする
 2. `C:\Users\kaiha\prompt-inserter-extension` を「パッケージ化されていない拡張機能を読み込む」で指定する
 3. `prompts.md` と必要に応じて `prompt_meta.json` を編集する
-4. Gemini / ChatGPT / Claude を開いた状態で popup からプロンプトを選んで「挿入」を押す
+4. Gemini / ChatGPT / Claude / NotebookLM を開いた状態で popup からプロンプトを選んで「挿入」を押す
 5. プレースホルダーを含む場合はモーダルに入力してから確定する
 
 ## メモ
